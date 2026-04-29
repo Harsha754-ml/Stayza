@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 import { User, Mail, Lock, ArrowRight, AtSign } from 'lucide-react';
 import { authService } from '../../services/api';
+import StayzaLogo from '../../components/ui/StayzaLogo';
 
 const Register: React.FC = () => {
   const [form, setForm] = useState({
@@ -48,6 +49,9 @@ const Register: React.FC = () => {
       <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2, type: 'spring', stiffness: 100 }}
         className="w-full max-w-lg bg-surface/50 backdrop-blur-xl border border-white/10 p-8 rounded-3xl shadow-2xl z-10">
+        <div className="flex justify-center mb-6">
+          <StayzaLogo size={40} showText={true} />
+        </div>
         <h2 className="text-3xl font-bold text-white mb-2">Create Account</h2>
         <p className="text-gray-400 mb-8">Join the next generation of hostel living.</p>
 

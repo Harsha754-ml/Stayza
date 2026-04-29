@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 import { authService } from '../../services/api';
 import { ArrowRight, Mail, Lock, GraduationCap, ShieldCheck, Eye, EyeOff } from 'lucide-react';
+import StayzaLogo from '../../components/ui/StayzaLogo';
 
 type Role = 'student' | 'admin';
 
@@ -106,9 +107,8 @@ const Login: React.FC = () => {
       </AnimatePresence>
 
       <div className="w-full max-w-md z-10 space-y-6">
-        <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="text-center">
-          <div className="text-3xl font-black tracking-tighter text-white mb-1">STAYZA</div>
-          <p className="text-gray-500 text-sm">PG & Hostel Management System</p>
+        <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex flex-col items-center">
+          <StayzaLogo size={44} showText={true} />
         </motion.div>
 
         {/* Role Toggle */}
