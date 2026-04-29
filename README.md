@@ -1,231 +1,269 @@
-# Stayza — PG & Hostel Management System
+# Stayza — PG & Hostel Room Allocation and Complaint Management System
 
-A full-stack hostel management platform with AI-powered roommate matching, complaint auto-escalation, payment tracking, and peer feedback ratings.
+A full-stack hostel/PG management platform with AI-powered roommate matching, complaint auto-escalation, payment tracking, and peer feedback ratings.
 
 ![React](https://img.shields.io/badge/React-19-blue?logo=react)
 ![Django](https://img.shields.io/badge/Django-5.1-green?logo=django)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-blue?logo=postgresql)
 ![Tailwind](https://img.shields.io/badge/Tailwind-4-blue?logo=tailwindcss)
-![License](https://img.shields.io/badge/License-MIT-yellow)
 
-## Features
+---
 
-### Student Portal
-- **Room Booking** — Browse available rooms, view occupancy, and book
-- **Roommate Matching** — AI-scored matches based on sleep schedule, cleanliness, noise tolerance + peer reputation (70% preferences / 30% feedback)
-- **Complaints** — File complaints with image upload, track status, auto-escalation after 48h
-- **Payments** — View pending dues, pay via card/UPI, payment history
-- **Feedback** — Rate roommates on cleanliness, noise, and overall experience (1–5 stars) after checkout
-- **AI Chatbot** — Query room, complaint, and payment info via chat
+## 🚀 How to Run This Project (Step by Step)
 
-### Admin Portal
-- **Dashboard** — System metrics, escalated complaints, payment summaries
-- **Complaint Queue** — Priority-sorted management, staff assignment, resolve actions
-- **Room Allocation** — Grid/list view of all rooms, occupancy tracking, manual assignment
-- **Payment Tracking** — Collection stats, overdue alerts, mark-as-paid
-- **Staff Management** — View staff members and roles
+> **Read every step. Don't skip anything. Copy-paste the commands exactly.**
 
-### System
-- JWT authentication with token refresh
-- Role-based access control (Student / Admin / Staff)
-- Auto-escalation of unresolved complaints via Celery
-- Peer feedback integrated into roommate matching algorithm
+---
 
-## Tech Stack
+### STEP 0: Install These First (if you don't have them)
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 19, TypeScript, Vite 8, Tailwind CSS 4 |
-| Backend | Django 5.1, Django REST Framework |
-| Database | PostgreSQL |
-| State | Zustand |
-| Auth | JWT (SimpleJWT) |
-| Animations | Framer Motion, Three.js |
-| Background Jobs | Celery + Redis |
+You need these 3 things installed on your computer:
 
-## Project Structure
+| Software | Download Link | How to check if installed |
+|----------|--------------|--------------------------|
+| **Node.js** (v18+) | https://nodejs.org | Open terminal, type `node --version` |
+| **Python** (v3.11+) | https://python.org | Open terminal, type `python --version` |
+| **PostgreSQL** (v14+) | https://www.postgresql.org/download/ | Check if pgAdmin app exists on your PC |
+
+⚠️ **When installing Python**, check the box that says **"Add Python to PATH"**.
+⚠️ **When installing PostgreSQL**, it will ask you to set a password. **REMEMBER THIS PASSWORD.** You'll need it in Step 2.
+
+---
+
+### STEP 1: Clone the Project
+
+Open a terminal (PowerShell on Windows, Terminal on Mac) and run:
+
+```bash
+git clone https://github.com/Harsha754-ml/Stayza
+cd stayza
+```
+
+---
+
+### STEP 2: Create the Database
+
+#### Option A: Using pgAdmin (the GUI app — easiest)
+
+1. Open **pgAdmin 4** from your Start Menu / Applications
+2. It will ask for a master password — set one and remember it
+3. On the left sidebar, click the arrow next to **Servers** → **PostgreSQL**
+4. It asks for your PostgreSQL password (the one from installation) — type it
+5. Right-click **Databases** → **Create** → **Database...**
+6. Type `stayza_db` in the Database name field
+7. Click **Save**
+
+#### Option B: Using the terminal
+
+```bash
+psql -U postgres
+```
+It will ask for your password. Type it and press Enter. Then:
+```sql
+CREATE DATABASE stayza_db;
+\q
+```
+
+> **If `psql` is not recognized:** The full path is probably:
+> - Windows: `"C:\Program Files\PostgreSQL\18\bin\psql.exe" -U postgres`
+> - Mac: `/Library/PostgreSQL/18/bin/psql -U postgres`
+> (Change `18` to your version number)
+
+---
+
+### STEP 3: Configure the Backend
+
+Open the file `backend/.env.example` and **copy it** to create `backend/.env`:
+
+**Windows (PowerShell):**
+```powershell
+cd backend
+copy .env.example .env
+```
+
+**Mac/Linux:**
+```bash
+cd backend
+cp .env.example .env
+```
+
+Now **open `backend/.env`** in any text editor and change this line:
+
+```
+DB_PASSWORD=your_postgres_password
+```
+
+Replace `your_postgres_password` with the **actual password you set when installing PostgreSQL**.
+
+For example, if your password is `mypass123`:
+```
+DB_PASSWORD=mypass123
+```
+
+Save the file.
+
+---
+
+### STEP 4: Start the Backend
+
+Run these commands **one by one** (make sure you're in the `backend` folder):
+
+**Windows:**
+```powershell
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+python manage.py makemigrations
+python manage.py migrate
+python manage.py seed_data
+python manage.py runserver
+```
+
+**Mac/Linux:**
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python manage.py makemigrations
+python manage.py migrate
+python manage.py seed_data
+python manage.py runserver
+```
+
+✅ If you see `Starting development server at http://127.0.0.1:8000/` — the backend is running!
+
+> **Keep this terminal open.** Don't close it.
+
+---
+
+### STEP 5: Start the Frontend
+
+Open a **NEW terminal window** (don't close the backend one). Navigate to the project root:
+
+```bash
+cd path/to/stayza
+```
+
+Then copy the env file and start:
+
+**Windows:**
+```powershell
+copy .env.example .env
+npm install
+npm run dev
+```
+
+**Mac/Linux:**
+```bash
+cp .env.example .env
+npm install
+npm run dev
+```
+
+✅ If you see `Local: http://localhost:5173/` — the frontend is running!
+
+---
+
+### STEP 6: Open the App
+
+Open your browser and go to: **http://localhost:5173**
+
+---
+
+## 🔑 Login Credentials
+
+The `seed_data` command creates test accounts. Use these to log in:
+
+| Role | Username | Password | What you'll see |
+|------|----------|----------|-----------------|
+| **Admin** | `admin` | `admin123` | Admin dashboard with complaints, rooms, payments, staff |
+| **Student** | `john` | `student123` | Student dashboard with room booking, complaints, feedback |
+| **Student** | `priya` | `student123` | Same as above |
+| **Student** | `arjun` | `student123` | Same as above |
+| **Staff** | `ravi` | `staff123` | Admin dashboard (staff view) |
+
+> All 8 students use password `student123`. All 4 staff use `staff123`.
+
+---
+
+## ❌ Common Errors and Fixes
+
+### "password authentication failed for user postgres"
+→ Wrong database password. Open `backend/.env` and fix `DB_PASSWORD`.
+
+### "database stayza_db does not exist"
+→ You didn't create the database. Go back to Step 2.
+
+### "psql is not recognized"
+→ Use the full path: `"C:\Program Files\PostgreSQL\18\bin\psql.exe" -U postgres`
+
+### "python is not recognized"
+→ Python isn't in your PATH. Reinstall Python and check **"Add to PATH"** during installation.
+
+### "npm is not recognized"
+→ Node.js isn't installed. Download it from https://nodejs.org
+
+### "No module named django" or "pip not found"
+→ You forgot to activate the virtual environment. Run `venv\Scripts\activate` (Windows) or `source venv/bin/activate` (Mac/Linux) first.
+
+### Backend starts but frontend shows "Network Error"
+→ Make sure the backend is still running in the other terminal at http://localhost:8000
+
+### "port 5432 connection refused"
+→ PostgreSQL service isn't running. Open **Services** (Windows) or **Activity Monitor** (Mac) and start the PostgreSQL service.
+
+---
+
+## 📁 Project Structure
 
 ```
 stayza/
 ├── backend/                    # Django REST API
-│   ├── config/                 # Settings, URLs, Celery config
+│   ├── config/                 # Settings, URLs, Celery
 │   ├── apps/
-│   │   ├── accounts/           # User model, auth, roommate matching
-│   │   ├── rooms/              # Room & booking management
-│   │   ├── complaints/         # Complaint system + auto-escalation
+│   │   ├── accounts/           # Users, auth, roommate matching
+│   │   ├── rooms/              # Rooms & bookings
+│   │   ├── complaints/         # Complaints + auto-escalation
 │   │   ├── payments/           # Payment tracking
 │   │   └── feedback/           # Roommate peer reviews
-│   ├── .env.example
+│   ├── .env.example            # ← Copy this to .env
 │   ├── manage.py
 │   └── requirements.txt
 ├── src/                        # React frontend
-│   ├── components/             # Layout, animations, UI
-│   ├── pages/                  # Student, admin, auth pages
-│   ├── services/api.ts         # Axios API layer
-│   └── store/useAuthStore.ts   # Zustand auth state
-├── .env.example
+│   ├── components/             # Layout, animations
+│   ├── pages/                  # All page components
+│   ├── services/api.ts         # API calls
+│   └── store/useAuthStore.ts   # Auth state
+├── .env.example                # ← Copy this to .env
 ├── package.json
-└── vite.config.ts
+└── README.md                   # You are here
 ```
 
-## Getting Started
+---
 
-### Prerequisites
+## 🧠 Features Explained
 
-- Python 3.11+
-- Node.js 18+
-- PostgreSQL 14+
-- Redis (optional — only for Celery background jobs)
-
-### 1. Clone the repo
-
-```bash
-git clone https://github.com/your-username/stayza.git
-cd stayza
+### Roommate Matching Algorithm
 ```
-
-### 2. Database setup
-
-Create a PostgreSQL database:
-
-```sql
-CREATE DATABASE stayza_db;
+score = (sleep_match + cleanliness_match + noise_match) × 70%
+      + peer_reputation × 30%
 ```
+- 70% comes from how well your preferences match
+- 30% comes from how past roommates rated this person
+- Students with no reviews get a neutral 50% reputation
 
-### 3. Backend setup
+### Complaint Auto-Escalation
+- Complaints unresolved for 48+ hours automatically increase in priority
+- Low → Medium → High → Flagged as escalated
+- Runs via Celery background job (every 30 min) or can be triggered manually
 
-```bash
-cd backend
-cp .env.example .env        # Then edit .env with your DB credentials
-python -m venv venv
-venv\Scripts\activate        # Windows
-# source venv/bin/activate   # macOS/Linux
-pip install -r requirements.txt
-python manage.py makemigrations
-python manage.py migrate
-python manage.py seed_data   # Load sample data
-python manage.py runserver   # Starts at http://localhost:8000
-```
+### Feedback System
+- Students rate roommates (1–5 stars) on cleanliness, noise, and overall experience
+- Ratings feed into the roommate matching algorithm
+- Available after checkout from a room
 
-### 4. Frontend setup
+---
 
-```bash
-# From project root (not backend/)
-cp .env.example .env
-npm install
-npm run dev                  # Starts at http://localhost:5173
-```
-
-### 5. Optional: Background jobs (Celery)
-
-For auto-escalation of complaints every 30 minutes:
-
-```bash
-cd backend
-celery -A config worker -l info      # Terminal 1
-celery -A config beat -l info        # Terminal 2
-```
-
-## Test Credentials
-
-After running `seed_data`:
-
-| Role | Username | Password |
-|------|----------|----------|
-| Admin | `admin` | `admin123` |
-| Staff | `ravi` | `staff123` |
-| Student | `john` | `student123` |
-| Student | `priya` | `student123` |
-| Student | `arjun` | `student123` |
-
-All 8 students use password `student123`. All 4 staff use `staff123`.
-
-## API Reference
-
-<details>
-<summary>Auth — <code>/api/auth/</code></summary>
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/auth/register/` | Register new user |
-| POST | `/auth/login/` | Login (returns JWT + user) |
-| POST | `/auth/token/refresh/` | Refresh JWT token |
-| GET/PATCH | `/auth/profile/` | Get/update profile |
-| GET | `/auth/roommate-matches/` | Scored roommate matches |
-| GET | `/auth/staff/` | List staff (admin only) |
-
-</details>
-
-<details>
-<summary>Rooms — <code>/api/rooms/</code></summary>
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/rooms/` | List all rooms |
-| POST | `/rooms/create/` | Create room (admin) |
-| GET/PATCH | `/rooms/<id>/` | Room detail/update |
-| POST | `/rooms/book/` | Book a room |
-| POST | `/rooms/checkout/` | Checkout |
-| GET | `/rooms/my-bookings/` | My bookings |
-| GET | `/rooms/all-bookings/` | All bookings (admin) |
-| POST | `/rooms/admin-assign/` | Assign student to room |
-
-</details>
-
-<details>
-<summary>Complaints — <code>/api/complaints/</code></summary>
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/complaints/` | All complaints (admin) |
-| POST | `/complaints/create/` | File complaint (multipart) |
-| GET | `/complaints/mine/` | My complaints |
-| GET/PATCH | `/complaints/<id>/` | Detail/update |
-| POST | `/complaints/<id>/assign/` | Assign to staff |
-| POST | `/complaints/<id>/resolve/` | Mark resolved |
-
-</details>
-
-<details>
-<summary>Payments — <code>/api/payments/</code></summary>
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/payments/` | All payments (admin) |
-| GET | `/payments/mine/` | My payments |
-| POST | `/payments/create/` | Create payment record |
-| POST | `/payments/<id>/pay/` | Mark as paid |
-| GET | `/payments/summary/` | Payment stats (admin) |
-
-</details>
-
-<details>
-<summary>Feedback — <code>/api/feedback/</code></summary>
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/feedback/submit/` | Submit roommate rating |
-| GET | `/feedback/pending/` | Roommates awaiting review |
-| GET | `/feedback/given/` | Reviews I've written |
-| GET | `/feedback/received/` | Reviews about me |
-| GET | `/feedback/` | All feedback (admin) |
-| GET | `/feedback/reputation/<user_id>/` | User reputation score |
-
-</details>
-
-## Roommate Matching Algorithm
-
-```
-base_score  = (sleep_match + cleanliness_match + noise_match) / 3
-reputation  = avg(peer_ratings) normalized to 0–1  (default 0.5 if no reviews)
-final_score = base_score × 70% + reputation × 30%
-```
-
-- **Sleep match**: 1.0 if same schedule or either is flexible, else 0.0
-- **Cleanliness match**: 1.0 − |diff| / 2
-- **Noise match**: 1.0 − |diff| / 2
-- **Reputation**: Average of cleanliness + noise + overall ratings from peer feedback, normalized from 1–5 scale to 0–1
-
-## License
+## 📝 License
 
 MIT
