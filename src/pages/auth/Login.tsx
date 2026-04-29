@@ -3,37 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 import { authService } from '../../services/api';
-import { ArrowRight, Mail, Lock, GraduationCap, ShieldCheck, Eye, EyeOff } from 'lucide-react';
+import { ArrowRight, Lock, GraduationCap, ShieldCheck, Eye, EyeOff, User } from 'lucide-react';
 import StayzaLogo from '../../components/ui/StayzaLogo';
 
 type Role = 'student' | 'admin';
-
-const roleConfig = {
-  student: {
-    icon: GraduationCap,
-    label: 'Student',
-    accent: 'from-primary-500 to-cyan-400',
-    ring: 'focus:ring-primary-500',
-    glow: 'bg-primary-600/20',
-    glowAlt: 'bg-primary-400/10',
-    btn: 'bg-primary-500 hover:bg-primary-400',
-    tab: 'bg-primary-500/20 text-primary-400 border-primary-500/40',
-    hint: 'Use your student credentials to sign in',
-    placeholder: 'john',
-  },
-  admin: {
-    icon: ShieldCheck,
-    label: 'Admin',
-    accent: 'from-violet-500 to-indigo-500',
-    ring: 'focus:ring-violet-500',
-    glow: 'bg-violet-600/20',
-    glowAlt: 'bg-indigo-400/10',
-    btn: 'bg-violet-500 hover:bg-violet-400',
-    tab: 'bg-violet-500/20 text-violet-400 border-violet-500/40',
-    hint: 'Restricted to hostel management staff only',
-    placeholder: 'admin',
-  },
-};
 
 const Login: React.FC = () => {
   const [role, setRole] = useState<Role>('student');
@@ -45,195 +18,140 @@ const Login: React.FC = () => {
   const login = useAuthStore(state => state.login);
   const navigate = useNavigate();
 
-  const cfg = roleConfig[role];
-  const RoleIcon = cfg.icon;
-
-  const handleRoleSwitch = (newRole: Role) => {
-    setRole(newRole);
-    setUsername('');
-    setPassword('');
-    setError('');
-  };
+  const handleRoleSwitch = (r: Role) => { setRole(r); setUsername(''); setPassword(''); setError(''); };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
-
     try {
       const res = await authService.login({ username, password });
       const { access, refresh, user } = res.data;
-
-      if (role === 'student' && user.role !== 'student') {
-        setError('This account is not a student account.');
-        setIsLoading(false);
-        return;
-      }
-      if (role === 'admin' && user.role !== 'admin' && user.role !== 'staff') {
-        setError('This account is not an admin/staff account.');
-        setIsLoading(false);
-        return;
-      }
-
+      if (role === 'student' && user.role !== 'student') { setError('Not a student account.'); setIsLoading(false); return; }
+      if (role === 'admin' && user.role !== 'admin' && user.role !== 'staff') { setError('Not an admin/staff account.'); setIsLoading(false); return; }
       login(user, access, refresh);
       navigate(user.role === 'student' ? '/student/dashboard' : '/admin/dashboard');
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { detail?: string } } };
-      setError(axiosErr.response?.data?.detail || 'Invalid credentials. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
+      setError(axiosErr.response?.data?.detail || 'Invalid credentials.');
+    } finally { setIsLoading(false); }
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="min-h-screen flex items-center justify-center bg-background px-4 py-12"
-    >
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={role}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.6 }}
-          className="absolute inset-0 overflow-hidden pointer-events-none"
-        >
-          <div className={`absolute top-[-10%] left-[-10%] w-[45%] h-[45%] rounded-full ${cfg.glow} blur-[130px]`} />
-          <div className={`absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full ${cfg.glowAlt} blur-[130px]`} />
-        </motion.div>
-      </AnimatePresence>
+    <div className="min-h-screen flex items-center justify-center bg-bg px-4 py-12 relative">
+      {/* Grid bg */}
+      <div className="absolute inset-0 grid-bg opacity-[0.03]" />
+      <div className="absolute top-[20%] left-[30%] w-[400px] h-[400px] rounded-full bg-accent/[0.03] blur-[180px] pointer-events-none" />
 
-      <div className="w-full max-w-md z-10 space-y-6">
-        <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex flex-col items-center">
-          <StayzaLogo size={44} showText={true} />
-        </motion.div>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md z-10 space-y-6">
 
-        {/* Role Toggle */}
-        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}
-          className="flex bg-surface/60 border border-white/10 rounded-2xl p-1.5 gap-1.5">
+        <div className="flex justify-center mb-2">
+          <StayzaLogo size={38} showText={true} />
+        </div>
+
+        {/* Role toggle */}
+        <div className="flex bg-surface border border-border rounded-lg p-1 gap-1">
           {(['student', 'admin'] as Role[]).map(r => {
-            const rc = roleConfig[r];
-            const Icon = rc.icon;
             const isActive = role === r;
+            const Icon = r === 'student' ? GraduationCap : ShieldCheck;
             return (
               <button key={r} onClick={() => handleRoleSwitch(r)}
-                className={`relative flex-1 flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl font-semibold text-sm transition-all duration-300 hover-target ${
-                  isActive ? `${rc.tab} border` : 'text-gray-500 hover:text-gray-300'
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-md text-sm font-medium transition-all ${
+                  isActive ? 'bg-accent-bg text-accent border border-accent/30' : 'text-text-2 hover:text-text-1'
                 }`}>
                 <Icon className="w-4 h-4" />
-                {rc.label} Login
-                {isActive && (
-                  <motion.div layoutId="roleIndicator" className="absolute inset-0 rounded-xl border border-current opacity-20" />
-                )}
+                {r === 'student' ? 'Student' : 'Admin'}
               </button>
             );
           })}
-        </motion.div>
+        </div>
 
-        {/* Card */}
+        {/* Form card */}
         <AnimatePresence mode="wait">
           <motion.div key={role}
-            initial={{ opacity: 0, y: 16, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -16, scale: 0.98 }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
-            className="bg-surface/50 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
-            <div className="flex items-center gap-4 mb-8">
-              <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${cfg.accent} flex items-center justify-center shadow-lg`}>
-                <RoleIcon className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-white leading-tight">
-                  {role === 'student' ? 'Student Portal' : 'Admin Portal'}
-                </h2>
-                <p className="text-gray-400 text-sm mt-0.5">{cfg.hint}</p>
-              </div>
-            </div>
+            initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.2 }}
+            className="card p-7">
+            <h2 className="font-[family-name:var(--font-display)] text-2xl text-text-1 mb-1">
+              {role === 'student' ? 'Student Portal' : 'Admin Portal'}
+            </h2>
+            <p className="text-sm text-text-3 mb-6">
+              {role === 'student' ? 'Sign in with your student credentials' : 'Restricted to hostel management staff'}
+            </p>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-300">Username</label>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="text-xs font-medium text-text-2 mb-1.5 block">Username</label>
                 <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 w-4.5 h-4.5" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-text-3 w-4 h-4" />
                   <input type="text" value={username}
                     onChange={e => { setUsername(e.target.value); setError(''); }}
-                    className={`w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-white placeholder-gray-600 focus:outline-none focus:ring-2 ${cfg.ring} transition-all`}
-                    placeholder={cfg.placeholder} required />
+                    className="w-full bg-bg border border-border rounded-lg py-2.5 pl-10 pr-4 text-text-1 text-sm placeholder-text-3 focus:outline-none focus:border-accent/50 transition-colors"
+                    placeholder={role === 'student' ? 'john' : 'admin'} required />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-300">Password</label>
+              <div>
+                <label className="text-xs font-medium text-text-2 mb-1.5 block">Password</label>
                 <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 w-4.5 h-4.5" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-text-3 w-4 h-4" />
                   <input type={showPassword ? 'text' : 'password'} value={password}
                     onChange={e => { setPassword(e.target.value); setError(''); }}
-                    className={`w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-11 pr-11 text-white placeholder-gray-600 focus:outline-none focus:ring-2 ${cfg.ring} transition-all`}
+                    className="w-full bg-bg border border-border rounded-lg py-2.5 pl-10 pr-10 text-text-1 text-sm placeholder-text-3 focus:outline-none focus:border-accent/50 transition-colors"
                     placeholder="••••••••" required />
                   <button type="button" onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors hover-target">
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text-3 hover:text-text-2 transition-colors">
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
               </div>
 
               {error && (
-                <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
-                  className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2.5">
+                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                  className="text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-3 py-2">
                   {error}
                 </motion.p>
               )}
 
               <button type="submit" disabled={isLoading}
-                className={`w-full group ${cfg.btn} text-white font-bold py-3.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover-target mt-2`}>
+                className="w-full flex items-center justify-center gap-2 bg-accent text-bg font-semibold text-sm py-3 rounded-lg hover:bg-accent-dim hover:scale-[1.01] transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-2">
                 {isLoading ? (
                   <span className="flex items-center gap-2">
                     <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
                     </svg>
-                    Signing In...
+                    Signing in...
                   </span>
                 ) : (
-                  <>
-                    Sign In as {cfg.label}
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </>
+                  <>Sign in as {role === 'student' ? 'Student' : 'Admin'} <ArrowRight className="w-4 h-4" /></>
                 )}
               </button>
             </form>
 
-            <div className="mt-6 pt-6 border-t border-white/5">
+            <div className="mt-5 pt-5 border-t border-border text-center">
               {role === 'student' ? (
-                <p className="text-center text-gray-400 text-sm">
-                  New student?{' '}
-                  <Link to="/register" className="text-primary-400 hover:text-primary-300 font-medium transition-colors hover-target">
-                    Create an account
-                  </Link>
+                <p className="text-sm text-text-2">
+                  New here?{' '}
+                  <Link to="/register" className="text-accent hover:text-accent-dim font-medium transition-colors">Create an account</Link>
                 </p>
               ) : (
-                <p className="text-center text-gray-500 text-xs leading-relaxed">
-                  Admin accounts are provisioned by hostel management.<br />
-                  Contact your system administrator for access.
-                </p>
+                <p className="text-xs text-text-3">Admin accounts are provisioned by hostel management.</p>
               )}
             </div>
           </motion.div>
         </AnimatePresence>
 
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
-          className="text-center text-xs text-gray-600">
-          {role === 'student' ? 'Are you a hostel admin? ' : 'Looking for student login? '}
+        <p className="text-center text-xs text-text-3">
+          {role === 'student' ? 'Hostel admin? ' : 'Student? '}
           <button onClick={() => handleRoleSwitch(role === 'student' ? 'admin' : 'student')}
-            className="text-gray-400 hover:text-white underline underline-offset-2 transition-colors hover-target">
-            Switch to {role === 'student' ? 'Admin' : 'Student'} Login
+            className="text-text-2 hover:text-text-1 underline underline-offset-2 transition-colors">
+            Switch to {role === 'student' ? 'Admin' : 'Student'}
           </button>
-        </motion.p>
-      </div>
-    </motion.div>
+        </p>
+      </motion.div>
+    </div>
   );
 };
 
