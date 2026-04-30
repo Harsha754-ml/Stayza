@@ -124,3 +124,13 @@ export const feedbackService = {
   all: () => api.get('/feedback/'),
   reputation: (userId: number) => api.get(`/feedback/reputation/${userId}/`),
 };
+
+// ── Notifications ──
+export const notificationService = {
+  list: () => api.get('/auth/notifications/'),
+};
+
+// ── Analytics ──
+export const analyticsService = {
+  dashboard: () => api.get('/rooms/analytics/'),
+};

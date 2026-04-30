@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useInView } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import { Bed, AlertCircle, CreditCard, Star, ArrowRight, Clock } from 'lucide-react';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
+import { Link, useNavigate } from 'react-router-dom';
+import { Bed, AlertCircle, CreditCard, Star, ArrowRight, Clock, Check, DoorOpen } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { roomService, complaintService, paymentService, feedbackService } from '../../services/api';
 
@@ -24,42 +24,52 @@ const useCountUp = (end: number, duration = 800) => {
 };
 
 interface DashData {
-  roomNumber: string; roomType: string; activeComplaints: number;
-  pendingDues: number; pendingFeedback: number;
+  roomNumber: string; roomType: string; roomFloor: number; roomPrice: string;
+  roomId: number | null; bookingId: number | null; hasActiveBooking: boolean;
+  activeComplaints: number; pendingDues: number; pendingFeedback: number;
   recentComplaints: Array<{ id: number; title: string; status: string; priority: string; created_at: string }>;
 }
 
 const StudentDashboard: React.FC = () => {
   const { user } = useAuthStore();
+  const navigate = useNavigate();
   const [data, setData] = useState<DashData>({
-    roomNumber: '—', roomType: '', activeComplaints: 0, pendingDues: 0, pendingFeedback: 0, recentComplaints: [],
+    roomNumber: '—', roomType: '', roomFloor: 0, roomPrice: '0',
+    roomId: null, bookingId: null, hasActiveBooking: false,
+    activeComplaints: 0, pendingDues: 0, pendingFeedback: 0, recentComplaints: [],
   });
   const [loading, setLoading] = useState(true);
+  const [checkingOut, setCheckingOut] = useState(false);
+  const [checkedOut, setCheckedOut] = useState(false);
 
-  useEffect(() => {
-    const fetch = async () => {
-      try {
-        const [bRes, cRes, pRes, fRes] = await Promise.all([
-          roomService.myBookings(), complaintService.mine(), paymentService.mine(),
-          feedbackService.pending().catch(() => ({ data: [] })),
-        ]);
-        const bookings = bRes.data.results || bRes.data;
-        const active = bookings.find((b: { is_active: boolean }) => b.is_active);
-        const complaints = cRes.data.results || cRes.data;
-        const payments = pRes.data.results || pRes.data;
-        setData({
-          roomNumber: active?.room_detail?.number || '—',
-          roomType: active?.room_detail?.room_type || '',
-          activeComplaints: complaints.filter((c: { status: string }) => c.status !== 'resolved').length,
-          pendingDues: payments.filter((p: { status: string }) => p.status !== 'paid').reduce((s: number, p: { amount: number | string }) => s + Number(p.amount), 0),
-          pendingFeedback: fRes.data.length || 0,
-          recentComplaints: complaints.slice(0, 5),
-        });
-      } catch (err) { console.error(err); }
-      finally { setLoading(false); }
-    };
-    fetch();
-  }, []);
+  const fetchData = async () => {
+    try {
+      const [bRes, cRes, pRes, fRes] = await Promise.all([
+        roomService.myBookings(), complaintService.mine(), paymentService.mine(),
+        feedbackService.pending().catch(() => ({ data: [] })),
+      ]);
+      const bookings = bRes.data.results || bRes.data;
+      const active = bookings.find((b: { is_active: boolean }) => b.is_active);
+      const complaints = cRes.data.results || cRes.data;
+      const payments = pRes.data.results || pRes.data;
+      setData({
+        roomNumber: active?.room_detail?.number || '—',
+        roomType: active?.room_detail?.room_type || '',
+        roomFloor: active?.room_detail?.floor || 0,
+        roomPrice: active?.room_detail?.price_per_month || '0',
+        roomId: active?.room_detail?.id || null,
+        bookingId: active?.id || null,
+        hasActiveBooking: !!active,
+        activeComplaints: complaints.filter((c: { status: string }) => c.status !== 'resolved').length,
+        pendingDues: payments.filter((p: { status: string }) => p.status !== 'paid').reduce((s: number, p: { amount: number | string }) => s + Number(p.amount), 0),
+        pendingFeedback: fRes.data.length || 0,
+        recentComplaints: complaints.slice(0, 5),
+      });
+    } catch (err) { console.error(err); }
+    finally { setLoading(false); }
+  };
+
+  useEffect(() => { fetchData(); }, []);
 
   const cComplaints = useCountUp(data.activeComplaints);
   const cDues = useCountUp(data.pendingDues);
@@ -82,6 +92,17 @@ const StudentDashboard: React.FC = () => {
     { label: 'Pay dues', desc: 'Clear pending payments', path: '/student/payment', icon: CreditCard },
     { label: 'Find roommate', desc: 'AI-powered matching', path: '/student/roommates', icon: Star },
   ];
+
+  const handleCheckout = async () => {
+    setCheckingOut(true);
+    try {
+      await roomService.checkout();
+      setCheckedOut(true);
+      // After 3 seconds, redirect to feedback page
+      setTimeout(() => navigate('/student/feedback'), 3000);
+    } catch (err) { console.error(err); }
+    finally { setCheckingOut(false); }
+  };
 
   return (
     <div className="space-y-8">
@@ -115,6 +136,65 @@ const StudentDashboard: React.FC = () => {
           );
         })}
       </div>
+
+      {/* Current Room Card with Checkout */}
+      <AnimatePresence>
+        {data.hasActiveBooking && !checkedOut && (
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, height: 0 }}
+            className="card p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-accent-glow flex items-center justify-center">
+                  <Bed className="w-6 h-6 text-accent" strokeWidth={1.5} />
+                </div>
+                <div>
+                  <div className="text-[11px] font-medium tracking-[0.08em] uppercase text-text-2 mb-0.5">Your current room</div>
+                  <div className="text-[18px] font-semibold text-text-1">Room {data.roomNumber}</div>
+                  <div className="text-[13px] text-text-2 capitalize">{data.roomType} · Floor {data.roomFloor} · ₹{Number(data.roomPrice).toLocaleString()}/mo</div>
+                </div>
+              </div>
+              <button onClick={handleCheckout} disabled={checkingOut}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-red/30 text-red hover:bg-red-bg hover:border-red/50 transition-all duration-200 text-[13px] font-medium disabled:opacity-50">
+                <DoorOpen className="w-4 h-4" strokeWidth={1.5} />
+                {checkingOut ? 'Checking out...' : 'Check out'}
+              </button>
+            </div>
+          </motion.div>
+        )}
+        {checkedOut && (
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+            className="card p-6 border-green/20">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-green-bg flex items-center justify-center">
+                <Check className="w-6 h-6 text-green" strokeWidth={1.5} />
+              </div>
+              <div>
+                <div className="text-[16px] font-semibold text-text-1">Checked out successfully!</div>
+                <div className="text-[13px] text-text-2">Redirecting to feedback page — rate your roommate before you go...</div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+        {!data.hasActiveBooking && !checkedOut && (
+          <div className="card p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-overlay flex items-center justify-center">
+                  <Bed className="w-6 h-6 text-text-3" strokeWidth={1.5} />
+                </div>
+                <div>
+                  <div className="text-[16px] font-semibold text-text-1">No room booked yet</div>
+                  <div className="text-[13px] text-text-2">Find and book your ideal room to get started.</div>
+                </div>
+              </div>
+              <Link to="/student/rooms"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-accent text-white hover:bg-accent-dim transition-all duration-200 text-[13px] font-semibold">
+                Book a room <ArrowRight className="w-4 h-4" strokeWidth={1.5} />
+              </Link>
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Quick access + Complaints */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

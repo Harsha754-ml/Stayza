@@ -1,8 +1,9 @@
 import React from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
-import { Home, MessageSquare, CreditCard, Bed, LogOut, AlertCircle, Users, UserCog, Star } from 'lucide-react';
+import { Home, MessageSquare, CreditCard, Bed, LogOut, AlertCircle, Users, UserCog, Star, BarChart3, User } from 'lucide-react';
 import StayzaLogo from '../ui/StayzaLogo';
+import NotificationBell from '../ui/NotificationBell';
 
 const DashboardLayout: React.FC = () => {
   const { user, logout } = useAuthStore();
@@ -18,6 +19,7 @@ const DashboardLayout: React.FC = () => {
         { path: '/admin/allocation', label: 'Rooms', icon: Bed },
         { path: '/admin/payments', label: 'Payments', icon: CreditCard },
         { path: '/admin/staff', label: 'Staff', icon: UserCog },
+        { path: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
       ]
     : [
         { path: '/student/dashboard', label: 'Overview', icon: Home },
@@ -26,7 +28,7 @@ const DashboardLayout: React.FC = () => {
         { path: '/student/complaints', label: 'Complaints', icon: AlertCircle },
         { path: '/student/payment', label: 'Payments', icon: CreditCard },
         { path: '/student/feedback', label: 'Feedback', icon: Star },
-        { path: '/student/chatbot', label: 'AI Assistant', icon: MessageSquare },
+        { path: '/student/profile', label: 'Profile', icon: User },
       ];
 
   return (
@@ -79,7 +81,8 @@ const DashboardLayout: React.FC = () => {
       {/* Main */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         {/* Topbar — 56px */}
-        <header className="h-14 flex items-center justify-end px-8 bg-base border-b border-border shrink-0">
+        <header className="h-14 flex items-center justify-end gap-3 px-8 bg-base border-b border-border shrink-0">
+          <NotificationBell />
           <Link to="/login"
             className="text-[13px] font-medium text-text-1 px-4 py-2 rounded-lg border border-border-strong hover:border-accent hover:text-accent transition-all duration-200">
             Switch account
@@ -87,10 +90,18 @@ const DashboardLayout: React.FC = () => {
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto bg-base">
+        <main className="flex-1 overflow-y-auto bg-base relative">
           <div className="px-10 py-8">
             <Outlet />
           </div>
+
+          {/* Floating AI Assistant button — student only */}
+          {user?.role === 'student' && (
+            <Link to="/student/chatbot"
+              className="fixed bottom-6 right-6 z-40 w-12 h-12 rounded-full bg-accent hover:bg-accent-dim flex items-center justify-center shadow-[0_4px_20px_rgba(99,102,241,0.4)] hover:shadow-[0_6px_28px_rgba(99,102,241,0.5)] hover:scale-105 transition-all duration-200 group">
+              <MessageSquare className="w-5 h-5 text-white group-hover:scale-110 transition-transform" strokeWidth={1.5} />
+            </Link>
+          )}
         </main>
       </div>
     </div>

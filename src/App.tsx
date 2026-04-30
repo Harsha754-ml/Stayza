@@ -17,11 +17,13 @@ import Payment from './pages/student/Payment';
 import Complaints from './pages/student/Complaints';
 import RoommateMatching from './pages/student/RoommateMatching';
 import Feedback from './pages/student/Feedback';
+import Profile from './pages/student/Profile';
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminComplaints from './pages/admin/Complaints';
 import Allocation from './pages/admin/Allocation';
 import AdminPayments from './pages/admin/Payments';
 import AdminStaff from './pages/admin/Staff';
+import Analytics from './pages/admin/Analytics';
 
 const App: React.FC = () => {
   return (
@@ -43,6 +45,7 @@ const App: React.FC = () => {
                 <Route path="/student/complaints" element={<Complaints />} />
                 <Route path="/student/roommates" element={<RoommateMatching />} />
                 <Route path="/student/feedback" element={<Feedback />} />
+                <Route path="/student/profile" element={<Profile />} />
               </Route>
             </Route>
 
@@ -54,6 +57,7 @@ const App: React.FC = () => {
                 <Route path="/admin/allocation" element={<Allocation />} />
                 <Route path="/admin/payments" element={<AdminPayments />} />
                 <Route path="/admin/staff" element={<AdminStaff />} />
+                <Route path="/admin/analytics" element={<Analytics />} />
               </Route>
             </Route>
           </Route>
