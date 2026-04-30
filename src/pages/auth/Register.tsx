@@ -24,10 +24,22 @@ const Register: React.FC = () => {
       await authService.register({ ...form, role: 'student' });
       navigate('/login');
     } catch (err: unknown) {
-      const axiosErr = err as { response?: { data?: Record<string, string[]> } };
+      const axiosErr = err as { response?: { data?: Record<string, unknown> } };
       const data = axiosErr.response?.data;
-      if (data) { const firstErr = Object.values(data).flat()[0]; setError(typeof firstErr === 'string' ? firstErr : 'Registration failed.'); }
-      else setError('Registration failed.');
+      if (data) {
+        // Collect all error messages from the response
+        const messages: string[] = [];
+        for (const [key, val] of Object.entries(data)) {
+          if (Array.isArray(val)) {
+            messages.push(`${key}: ${val.join(', ')}`);
+          } else if (typeof val === 'string') {
+            messages.push(val);
+          }
+        }
+        setError(messages.length > 0 ? messages.join(' | ') : 'Registration failed.');
+      } else {
+        setError('Registration failed. Is the backend running?');
+      }
     } finally { setIsLoading(false); }
   };
 
