@@ -13,8 +13,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) => {
     return <Navigate to="/login" replace />;
   }
 
+  // If wrong role, redirect to THEIR dashboard (not landing page)
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/" replace />;
+    const correctPath = user.role === 'student' ? '/student/dashboard' : '/admin/dashboard';
+    return <Navigate to={correctPath} replace />;
   }
 
   return <Outlet />;

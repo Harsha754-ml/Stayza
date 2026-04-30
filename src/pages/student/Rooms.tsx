@@ -40,6 +40,9 @@ const Rooms: React.FC = () => {
   const [error, setError] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
 
+  const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [bookedRoomNumber, setBookedRoomNumber] = useState('');
+
   useEffect(() => {
     roomService.list().then(res => {
       setRooms(res.data.results || res.data);
@@ -51,8 +54,10 @@ const Rooms: React.FC = () => {
     setBooking(true);
     setError('');
     try {
-      await roomService.book(selectedRoom);
-      navigate('/student/payment');
+      const res = await roomService.book(selectedRoom);
+      const roomNum = res.data?.room_detail?.number || rooms.find(r => r.id === selectedRoom)?.number || '';
+      setBookedRoomNumber(roomNum);
+      setBookingSuccess(true);
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { detail?: string } } };
       setError(axiosErr.response?.data?.detail || 'Booking failed.');
@@ -75,6 +80,31 @@ const Rooms: React.FC = () => {
   }
 
   const selectedRoomData = rooms.find(r => r.id === selectedRoom);
+
+  // Booking success screen
+  if (bookingSuccess) {
+    return (
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+        className="max-w-md mx-auto mt-20 text-center">
+        <div className="w-20 h-20 rounded-full bg-success/10 border border-success/20 flex items-center justify-center mx-auto mb-6">
+          <Check className="w-10 h-10 text-success" />
+        </div>
+        <h1 className="font-[family-name:var(--font-display)] text-3xl text-text-1 mb-2">Room Booked!</h1>
+        <p className="text-text-2 mb-2">You've successfully booked <span className="text-text-1 font-semibold">Room {bookedRoomNumber}</span>.</p>
+        <p className="text-text-3 text-sm mb-8">Your room is confirmed. You can view your booking from the dashboard.</p>
+        <div className="flex flex-col gap-3 items-center">
+          <button onClick={() => navigate('/student/dashboard')}
+            className="inline-flex items-center gap-2 bg-accent text-bg font-semibold text-sm px-6 py-3 rounded-lg hover:bg-accent-dim hover:scale-[1.02] transition-all">
+            Go to Dashboard <ArrowRight className="w-4 h-4" />
+          </button>
+          <button onClick={() => navigate('/student/payment')}
+            className="text-sm text-text-2 hover:text-text-1 transition-colors underline underline-offset-2">
+            View Payments
+          </button>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="space-y-8">

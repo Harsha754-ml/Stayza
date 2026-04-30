@@ -1,11 +1,19 @@
 import React from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, useLocation, Navigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 import { ArrowRight } from 'lucide-react';
 import StayzaLogo from '../ui/StayzaLogo';
 
 const AppLayout: React.FC = () => {
   const { user } = useAuthStore();
+  const location = useLocation();
+
+  // If logged in and trying to access login/register, redirect to dashboard
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+  if (user && isAuthPage) {
+    const dashPath = user.role === 'student' ? '/student/dashboard' : '/admin/dashboard';
+    return <Navigate to={dashPath} replace />;
+  }
 
   return (
     <div className="relative min-h-screen w-full bg-bg overflow-hidden">
@@ -16,10 +24,12 @@ const AppLayout: React.FC = () => {
           </Link>
           <div className="flex items-center gap-4">
             {user ? (
-              <Link to={user.role === 'student' ? '/student/dashboard' : '/admin/dashboard'}
-                className="inline-flex items-center gap-2 bg-accent text-bg font-semibold text-sm px-5 py-2.5 rounded-lg hover:bg-accent-dim hover:scale-[1.02] transition-all">
-                Dashboard <ArrowRight className="w-4 h-4" />
-              </Link>
+              <>
+                <Link to={user.role === 'student' ? '/student/dashboard' : '/admin/dashboard'}
+                  className="inline-flex items-center gap-2 bg-accent text-bg font-semibold text-sm px-5 py-2.5 rounded-lg hover:bg-accent-dim hover:scale-[1.02] transition-all">
+                  Go to {user.role === 'student' ? 'Student' : 'Admin'} Dashboard <ArrowRight className="w-4 h-4" />
+                </Link>
+              </>
             ) : (
               <>
                 <Link to="/login" className="text-sm font-medium text-text-2 hover:text-text-1 transition-colors px-3 py-2">
