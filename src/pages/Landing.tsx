@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ShieldCheck, Users, CreditCard, Star, MessageSquare, BarChart3, Heart } from 'lucide-react';
 import StayzaLogo from '../components/ui/StayzaLogo';
 
-/* ── Counter hook ── */
 const useCounter = (end: number, duration = 1800) => {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
@@ -23,7 +22,6 @@ const useCounter = (end: number, duration = 1800) => {
   return { count, ref };
 };
 
-/* ── Fade-in-up ── */
 const FadeIn: React.FC<{ children: React.ReactNode; delay?: number; className?: string }> = ({ children, delay = 0, className = '' }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-60px' });
@@ -35,7 +33,6 @@ const FadeIn: React.FC<{ children: React.ReactNode; delay?: number; className?: 
   );
 };
 
-/* ── Word stagger ── */
 const Words: React.FC<{ text: string; className?: string; delay?: number }> = ({ text, className = '', delay = 0 }) => (
   <span className={className}>
     {text.split(' ').map((word, i) => (
@@ -71,47 +68,48 @@ const Landing: React.FC = () => {
       <section className="relative min-h-screen flex items-center px-6 sm:px-8 pt-24 pb-20">
         {/* Grid pattern */}
         <div className="absolute inset-0 grid-bg opacity-[0.04]" />
-        {/* Faint accent glow */}
-        <div className="absolute top-[20%] left-[5%] w-[500px] h-[500px] rounded-full bg-accent/[0.03] blur-[200px] pointer-events-none" />
+        {/* Accent glow */}
+        <div className="absolute top-[15%] left-[0%] w-[500px] h-[500px] rounded-full bg-accent/[0.04] blur-[200px] pointer-events-none" />
 
         <div className="max-w-7xl mx-auto w-full relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-            {/* Left — text */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+
+            {/* Left — text content */}
             <div className="lg:col-span-7">
-              {/* Badge */}
+              {/* Badge — transparent bg, accent border */}
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.1 }}
-                className="inline-flex items-center px-3 py-1.5 rounded bg-accent-bg border border-accent/30 mb-10">
-                <span className="text-[11px] font-semibold tracking-[0.08em] uppercase text-accent">
+                className="inline-flex items-center px-3.5 py-1.5 rounded border border-accent bg-transparent mb-10">
+                <span className="text-[11px] font-semibold tracking-[0.1em] uppercase text-accent">
                   ✦ Built for students, not spreadsheets
                 </span>
               </motion.div>
 
-              {/* Headline */}
-              <h1 className="font-[family-name:var(--font-display)] leading-[0.95] tracking-tight mb-8">
-                <span className="block text-[clamp(2.8rem,7vw,6rem)] text-text-1">
+              {/* Headline — 72px, 2 lines */}
+              <h1 className="font-[family-name:var(--font-display)] leading-[1.05] tracking-tight mb-8">
+                <span className="block text-[clamp(2.5rem,5vw,4.5rem)] text-text-1">
                   <Words text="Where students find" delay={0.2} />
                 </span>
                 <motion.span
                   initial={{ clipPath: 'inset(0 100% 0 0)' }}
                   animate={{ clipPath: 'inset(0 0% 0 0)' }}
-                  transition={{ duration: 0.5, delay: 0.65, ease: [0.22, 1, 0.36, 1] }}
-                  className="block text-[clamp(3rem,8vw,6.5rem)] text-accent italic -mt-1">
+                  transition={{ duration: 0.5, delay: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                  className="block text-[clamp(2.5rem,5vw,4.5rem)] text-accent italic">
                   home away from home
                 </motion.span>
               </h1>
 
               {/* Subtitle */}
               <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.9 }}
+                transition={{ duration: 0.5, delay: 0.85 }}
                 className="text-lg text-text-2 max-w-lg leading-relaxed mb-10 font-light">
                 AI-powered roommate matching, smart complaint resolution, seamless payments, and honest peer feedback — built for how students actually live.
               </motion.p>
 
               {/* CTAs */}
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 1.05 }}
-                className="flex flex-wrap items-center gap-3">
+                transition={{ duration: 0.4, delay: 1.0 }}
+                className="flex flex-wrap items-center gap-3 mb-16">
                 <Link to="/register">
                   <button className="inline-flex items-center gap-2 bg-accent text-bg font-semibold text-[15px] px-7 py-3.5 rounded-lg hover:bg-accent-dim hover:scale-[1.02] transition-all">
                     Let's get started <ArrowRight className="w-4.5 h-4.5" />
@@ -123,25 +121,52 @@ const Landing: React.FC = () => {
                   </button>
                 </Link>
               </motion.div>
-            </div>
 
-            {/* Right — stats stacked */}
-            <div className="lg:col-span-5">
-              <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.8 }}
-                className="space-y-0 border border-border rounded-xl overflow-hidden bg-surface">
+              {/* Stats — horizontal row below text */}
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 1.15 }}
+                className="flex items-start gap-12">
                 {[
                   { ref: s1.ref, value: `${s1.count}+`, label: 'Students housed' },
                   { ref: s2.ref, value: `${s2.count}%`, label: 'Match accuracy' },
-                  { ref: s3.ref, value: `<${s3.count}h`, label: 'Avg resolution time' },
+                  { ref: s3.ref, value: `<${s3.count}h`, label: 'Avg resolution' },
                   { ref: s4.ref, value: `${(s4.count / 10).toFixed(1)}★`, label: 'Student rating' },
                 ].map((s, i) => (
-                  <div key={i} ref={s.ref}
-                    className={`flex items-center justify-between px-6 py-5 ${i < 3 ? 'border-b border-border' : ''}`}>
-                    <span className="text-[13px] font-medium tracking-[0.04em] uppercase text-text-2">{s.label}</span>
-                    <span className="font-[family-name:var(--font-display)] text-3xl text-text-1">{s.value}</span>
+                  <div key={i} ref={s.ref} className="border-t border-border pt-4">
+                    <div className="text-[32px] font-bold text-text-1 leading-none mb-1.5">{s.value}</div>
+                    <div className="text-[11px] font-medium tracking-[0.1em] uppercase text-text-2">{s.label}</div>
                   </div>
                 ))}
+              </motion.div>
+            </div>
+
+            {/* Right — abstract CSS/SVG illustration */}
+            <div className="lg:col-span-5 hidden lg:flex items-center justify-center">
+              <motion.div initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                className="relative w-[380px] h-[380px]">
+                {/* Large ring */}
+                <div className="absolute inset-0 rounded-full border border-border" />
+                {/* Medium ring — offset */}
+                <div className="absolute top-[15%] left-[15%] w-[70%] h-[70%] rounded-full border border-border" />
+                {/* Small ring — offset other direction */}
+                <div className="absolute top-[35%] left-[10%] w-[45%] h-[45%] rounded-full border border-border-light" />
+                {/* Tiny filled accent circle */}
+                <div className="absolute top-[28%] right-[22%] w-5 h-5 rounded-full bg-accent" />
+                {/* Another ring top-right */}
+                <div className="absolute top-[5%] right-[5%] w-[50%] h-[50%] rounded-full border border-border opacity-50" />
+                {/* Dot cluster */}
+                <div className="absolute bottom-[20%] left-[25%] w-3 h-3 rounded-full bg-border-light" />
+                <div className="absolute bottom-[25%] left-[32%] w-2 h-2 rounded-full bg-border" />
+                {/* Large accent ring — subtle */}
+                <div className="absolute top-[20%] left-[20%] w-[60%] h-[60%] rounded-full border-2 border-accent/10" />
+                {/* Small filled muted circle */}
+                <div className="absolute bottom-[30%] right-[15%] w-4 h-4 rounded-full bg-surface-2" />
+                {/* Accent arc — partial ring */}
+                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 380 380" fill="none">
+                  <circle cx="190" cy="190" r="140" stroke="#FF6B35" strokeWidth="1.5" strokeDasharray="60 840" strokeLinecap="round" opacity="0.4" />
+                  <circle cx="190" cy="190" r="100" stroke="#FF6B35" strokeWidth="1" strokeDasharray="40 600" strokeDashoffset="100" strokeLinecap="round" opacity="0.25" />
+                </svg>
               </motion.div>
             </div>
           </div>
@@ -166,7 +191,7 @@ const Landing: React.FC = () => {
                     <div className="w-10 h-10 rounded-lg bg-accent-bg border border-accent/20 flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-colors">
                       <Icon className="w-5 h-5 text-accent" />
                     </div>
-                    <h3 className="text-lg font-semibold text-text-1 mb-2 font-[family-name:var(--font-sans)]">{f.title}</h3>
+                    <h3 className="text-lg font-semibold text-text-1 mb-2">{f.title}</h3>
                     <p className="text-sm text-text-2 leading-relaxed">{f.desc}</p>
                   </div>
                 </FadeIn>
@@ -205,7 +230,7 @@ const Landing: React.FC = () => {
       {/* ── CTA ── */}
       <section className="relative py-24 sm:py-32 px-6 sm:px-8 border-t border-border">
         <FadeIn className="max-w-2xl mx-auto text-center">
-          <div className="card p-12 sm:p-16 border-accent/20 bg-accent-bg/30">
+          <div className="card p-12 sm:p-16 border-accent/15 bg-accent-bg/20">
             <Heart className="w-8 h-8 text-accent mx-auto mb-6" />
             <h2 className="font-[family-name:var(--font-display)] text-3xl sm:text-4xl text-text-1 mb-4">Ready to find your place?</h2>
             <p className="text-text-2 max-w-md mx-auto mb-8">Join hundreds of students already living smarter with Stayza.</p>
