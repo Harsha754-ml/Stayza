@@ -164,8 +164,8 @@ const Landing: React.FC = () => {
                 <div className="absolute bottom-[30%] right-[15%] w-4 h-4 rounded-full bg-surface-2" />
                 {/* Accent arc — partial ring */}
                 <svg className="absolute inset-0 w-full h-full" viewBox="0 0 380 380" fill="none">
-                  <circle cx="190" cy="190" r="140" stroke="#FF6B35" strokeWidth="1.5" strokeDasharray="60 840" strokeLinecap="round" opacity="0.4" />
-                  <circle cx="190" cy="190" r="100" stroke="#FF6B35" strokeWidth="1" strokeDasharray="40 600" strokeDashoffset="100" strokeLinecap="round" opacity="0.25" />
+                  <circle cx="190" cy="190" r="140" stroke="#6366F1" strokeWidth="1.5" strokeDasharray="60 840" strokeLinecap="round" opacity="0.4" />
+                  <circle cx="190" cy="190" r="100" stroke="#6366F1" strokeWidth="1" strokeDasharray="40 600" strokeDashoffset="100" strokeLinecap="round" opacity="0.25" />
                 </svg>
               </motion.div>
             </div>
